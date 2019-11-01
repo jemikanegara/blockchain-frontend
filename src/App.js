@@ -1,26 +1,36 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+import Header from './components/Header'
+import CurrencyBar from './components/CurrencyBar'
+import Trade from './components/Trade';
+import OpenOrders from './components/OpenOrders';
+import MarketSummary from './components/MarketSummary';
+import Chart from './components/Chart';
+import OrderBook from './components/OrderBook';
+import MarketHistory from './components/MarketHistory';
 
-function App() {
+
+const App = () => {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header />
+      {/* <CurrencyBar />
+      <main className="App__Main">
+        <div className="App__Left">
+          <Trade />
+          <OpenOrders />
+        </div>
+        <div className="App__Middle">
+          <MarketSummary />
+          <Chart />
+        </div>
+        <div className="App__Right">
+          <OrderBook />
+          <MarketHistory />
+        </div>
+      </main> */}
     </div>
-  );
+  )
 }
 
 export default App;
