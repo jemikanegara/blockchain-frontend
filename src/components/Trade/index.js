@@ -22,8 +22,6 @@ const Trade = () => {
     const [bestSell, setBestSell] = useState(0)
     const [bestBuy, setBestBuy] = useState(0)
 
-    const TICK_SUBSCRIPTION = 
-
     useEffect(() => {
         client
             .query({

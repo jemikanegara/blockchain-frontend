@@ -39,14 +39,14 @@ const App = () => {
           <Trade />
           <TryStellar />
         </Left>
-        {/* <Middle>
+        <Middle>
           <MarketSummary />
           <Chart />
         </Middle>
         <Right>
           <OrderBook />
           <MarketHistory />
-        </Right> */}
+        </Right>
       </Main>
     </div>
   )
