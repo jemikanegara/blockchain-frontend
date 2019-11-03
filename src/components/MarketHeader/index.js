@@ -9,6 +9,10 @@ const MarketHeader = (props) => {
         flex-shrink: 0;
         display: flex;
         justify-content: space-between;
+
+        * {
+            color: rgb(255, 255, 255);
+        }
     `
     return (
         <Container>

@@ -1,7 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components'
+import ApolloClient from 'apollo-boost';
+import { gql } from "apollo-boost";
+
+const client = new ApolloClient({
+    uri: 'https://demo.astrograph.io/graphql',
+});
 
 const MarketSummary = () => {
+    const tradeAggregation = {
+        avg: 0,
+        baseVolume: 0,
+        close: 0,
+        counterVolume: 0,
+        high: 0,
+        low: 0,
+        open: 0,
+        tradeCount: 37
+    }
+
+    const [marketData, setMarketData] = useState(tradeAggregation)
+    useEffect(() => {
+        client
+            .query({
+                query: gql`
+                    query {
+                    tradeAggregations(
+                    last: 1 # 1 day
+                    resolution: 86400000 # 24 hours
+                    baseAsset: "native"
+                    counterAsset: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
+                ) {
+                    tradeCount
+                    baseVolume
+                    counterVolume
+                    avg
+                    high
+                    low
+                    open
+                    close
+                    }   
+                }
+            `
+            })
+            .then(res => {
+                const data = res.data.tradeAggregations[0]
+                setMarketData(data)
+            });
+    }, [])
+
+    const [priceChange, setPriceChange] = useState(0)
+    useEffect(() => {
+        let { open, close } = marketData
+        let percentage = (close - open) / open
+        setPriceChange(percentage)
+    }, [marketData])
+
     const Container = styled.div`
         flex: 0 0 auto;
         background: rgb(24, 24, 33);
@@ -70,19 +124,22 @@ const MarketSummary = () => {
             <div>
                 <span className="title">24h Volume</span>
                 <Volume>
-                    <strong>6.2931677</strong>
+                    <strong>{marketData && marketData.counterVolume}</strong>
                     <strong>ETH</strong>
                 </Volume>
             </div>
             <div>
                 <span className="title">Last price per XLM</span>
                 <LastPrice>
-                    <strong>0</strong>
+                    <strong>{marketData && marketData.close.toFixed(0)}</strong>
                     <strong>ETH</strong>
                 </LastPrice>
             </div>
             <div>
                 <span className="title">24h Change</span>
+                <div style={{ color: `${priceChange < 0 ? `rgb(255, 139, 97)` : `rgb(63, 203, 224)`}` }}>
+                    {priceChange < 0 ? `-${priceChange.toFixed(2)}%` : `+${priceChange.toFixed(2)}%`}
+                </div>
             </div>
         </Container>
     )

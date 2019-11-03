@@ -21,6 +21,8 @@ const Trade = () => {
     // Buy or Sell
     const [bestSell, setBestSell] = useState(0)
     const [bestBuy, setBestBuy] = useState(0)
+    const [Qty, setQty] = useState(0)
+    const [total, setTotal] = useState(0)
 
     useEffect(() => {
         client
@@ -43,7 +45,6 @@ const Trade = () => {
                 setBestBuy(data.bestBuy.toFixed(7))
             });
     }, [])
-
 
     // Styling
     const Container = styled.div`
@@ -101,7 +102,7 @@ const Trade = () => {
         margin-bottom: 4px;
     `
 
-    const FormLabel = styled.form`
+    const FormLabel = styled.label`
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -213,13 +214,19 @@ const Trade = () => {
             <Form>
                 <FormLabel>
                     <span>Unit Price</span>
-                    <input 
-                    type="text" 
-                    pattern="\d*\.?\d*" 
-                    placeholder="0.00" 
-                    name="price" 
-                    autoComplete="off"
-                    value={activeButton === BUY ? bestBuy : bestSell}>
+                    <input
+                        type="text"
+                        pattern="\d*\.?\d*"
+                        placeholder="0.00"
+                        name="price"
+                        autoComplete="off"
+                        value={activeButton === BUY ? bestBuy : bestSell}
+                        onChange={e => {
+                            activeButton === BUY ?
+                                setBestBuy(e.target.value) :
+                                setBestSell(e.target.value)
+                        }
+                        }>
                     </input>
                     <span>ETH</span>
                 </FormLabel>
@@ -230,22 +237,32 @@ const Trade = () => {
                             :
                             <button>Sell Max</button>
                     }</span>
-                    <input 
-                    type="text" 
-                    pattern="\d*\.?\d*" 
-                    placeholder="0.00" 
-                    name="price" 
-                    autoComplete="off"></input>
+                    <input
+                        type="text"
+                        pattern="\d*\.?\d*"
+                        placeholder="0.00"
+                        name="price"
+                        autoComplete="off"
+                        value={Qty}
+                        onChange={e => {
+                            setQty(e.target.value)
+                        }}
+                    ></input>
                     <span>XLM</span>
                 </FormLabel>
                 <FormLabel>
                     <span>Total</span>
-                    <input 
-                    type="text" 
-                    pattern="\d*\.?\d*" 
-                    placeholder="0.00" 
-                    name="price" 
-                    autoComplete="off"></input>
+                    <input
+                        type="text"
+                        pattern="\d*\.?\d*"
+                        placeholder="0.00"
+                        name="price"
+                        autoComplete="off"
+                        value={total}
+                        onChange={e => {
+                            setTotal(e.target.value)
+                        }}
+                    ></input>
                     <span>ETH</span>
                 </FormLabel>
             </Form>

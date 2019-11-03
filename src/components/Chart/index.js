@@ -37,7 +37,10 @@ const Chart = () => {
                 cursor: pointer;       
             }
         }
+    `
 
+    const RightHead = styled.div`
+        position: relative;
 
         select {
             height: 24px;
@@ -62,6 +65,14 @@ const Chart = () => {
             margin: 5px 0;
             height: 30px;
         }
+        
+        span {
+            display: block;
+            position: absolute;
+            top: 30%;
+            right: 9px;
+            margin-top: -4px;
+        }
     `
     return (<Container>
         <MarketHeader>
@@ -69,16 +80,19 @@ const Chart = () => {
                 <button>Line Chart</button>
                 <button>Market Depth</button>
             </nav>
-            <select>
-                <option value="0">1H @ 1M intervals</option>
-                <option value="1">6H @ 5M intervals</option>
-                <option value="2">1D @ 30M intervals</option>
-                <option value="3">7D @ 3H intervals</option>
-                <option value="4">14D @ 6H intervals</option>
-                <option value="5">30D @ 12H intervals</option>
-                <option value="6">90D @ 1D intervals</option>
-                <option value="7">52W @ 1W intervals</option>
-            </select>
+            <RightHead>
+                <select>
+                    <option value="0">1H @ 1M intervals</option>
+                    <option value="1">6H @ 5M intervals</option>
+                    <option value="2">1D @ 30M intervals</option>
+                    <option value="3">7D @ 3H intervals</option>
+                    <option value="4">14D @ 6H intervals</option>
+                    <option value="5">30D @ 12H intervals</option>
+                    <option value="6">90D @ 1D intervals</option>
+                    <option value="7">52W @ 1W intervals</option>
+                </select>
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#fff" fillRule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg></span>
+            </RightHead>
         </MarketHeader>
     </Container>)
 }

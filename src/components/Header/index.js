@@ -12,6 +12,7 @@ const Header = () => {
         width: 100%;
         background: #181821;
         box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px;
+        z-index: 99;
     `
 
     const Left = styled.div`
