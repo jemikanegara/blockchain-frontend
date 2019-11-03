@@ -10,7 +10,8 @@ const Header = () => {
         top: 0;
         height: 80px;
         width: 100%;
-        background: rgb(24, 24, 33);
+        background: #181821;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px;
     `
 
     const Left = styled.div`
@@ -67,7 +68,7 @@ const Header = () => {
             top: 0;
             left: 0;
             position: absolute;
-            height: 5px;
+            height: 8px;
             background: #fff;
         }
 
@@ -179,7 +180,7 @@ const Header = () => {
                 <NavDropdown>
                     USD
                     <DropDownIcon>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#313147" fill-rule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#313147" fillRule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg>
                     </DropDownIcon>
                 </NavDropdown>
                 <LoginButton href="/login">
