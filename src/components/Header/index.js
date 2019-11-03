@@ -148,6 +148,7 @@ const Header = () => {
         text-decoration: none;
         transition: all 0.15s ease 0s;
         width: 180px;
+        color: #313147;
 
         :hover {
             background-size: 300% 100%;
@@ -155,14 +156,12 @@ const Header = () => {
         }
     `
 
-    const DepositButton = styled(HeaderRightButton)`
-        color: rgb(49, 49, 71);
-        background: linear-gradient(115deg, rgb(255, 224, 138) 50%, rgb(255, 217, 112) 50%) left bottom / 100% 100%;
+    const LoginButton = styled(HeaderRightButton)`
+        background: linear-gradient(115deg, rgb(255, 255, 255) 50%, rgb(255, 255, 255) 50%) left bottom / 100% 100%;
     `
 
-    const WithdrawButton = styled(HeaderRightButton)`
-        color: #fff;
-        background: linear-gradient(115deg, rgb(22, 162, 184) 50%, rgb(10, 147, 168) 50%) left bottom / 100% 100%;
+    const SignupButton = styled(HeaderRightButton)`
+        background: linear-gradient(115deg, rgb(255, 224, 138) 50%, rgb(255, 217, 112) 50%) left bottom / 100% 100%;
     `
 
     return (
@@ -173,8 +172,6 @@ const Header = () => {
                 </Logo>
                 <NavList>
                     <li><a href="/markets" className="active">Markets</a></li>
-                    <li><a href="/wallet">Wallet</a></li>
-                    <li><a href="/activity/orders">Activity</a></li>
                 </NavList>
             </Left>
             <Right>
@@ -185,15 +182,12 @@ const Header = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#313147" fill-rule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg>
                     </DropDownIcon>
                 </NavDropdown>
-                <NavDropdown>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M17 6A5 5 0 1 1 7 6a5 5 0 0 1 10 0zm-2 0a3 3 0 1 0-6 0 3 3 0 0 0 6 0zM3 22a9 9 0 0 1 18 0v1H3v-1zm15.93-1a7.002 7.002 0 0 0-13.86 0h13.86z" fill="#313147"></path></svg>
-                </NavDropdown>
-                <DepositButton href="/deposit">
-                    Deposit
-                </DepositButton>
-                <WithdrawButton href="/withdraw">
-                    Withdraw
-                </WithdrawButton>
+                <LoginButton href="/login">
+                    Login
+                </LoginButton>
+                <SignupButton href="/">
+                    Sign Up
+                </SignupButton>
             </Right>
 
         </Container>
