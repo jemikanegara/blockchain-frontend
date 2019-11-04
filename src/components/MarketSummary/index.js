@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components'
-import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-
-const client = new ApolloClient({
-    uri: 'https://demo.astrograph.io/graphql',
-});
+import { useQuery } from '@apollo/react-hooks';
 
 const MarketSummary = () => {
     const tradeAggregation = {
@@ -19,35 +15,34 @@ const MarketSummary = () => {
         tradeCount: 37
     }
 
-    const [marketData, setMarketData] = useState(tradeAggregation)
+    const MARKET_SUMMARY = gql`
+        query {
+        tradeAggregations(
+        last: 1 # 1 day
+        resolution: 86400000 # 24 hours
+        baseAsset: "native"
+        counterAsset: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
+    ) {
+        tradeCount
+        baseVolume
+        counterVolume
+        avg
+        high
+        low
+        open
+        close
+        }   
+    }
+    `
+    const { loading, error, data } = useQuery(MARKET_SUMMARY);
+    const [marketData, setMarketData] = useState(tradeAggregation);
+
+
     useEffect(() => {
-        client
-            .query({
-                query: gql`
-                    query {
-                    tradeAggregations(
-                    last: 1 # 1 day
-                    resolution: 86400000 # 24 hours
-                    baseAsset: "native"
-                    counterAsset: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
-                ) {
-                    tradeCount
-                    baseVolume
-                    counterVolume
-                    avg
-                    high
-                    low
-                    open
-                    close
-                    }   
-                }
-            `
-            })
-            .then(res => {
-                const data = res.data.tradeAggregations[0]
-                setMarketData(data)
-            });
-    }, [])
+        if(!loading && !error){
+            setMarketData(data.tradeAggregations[0])
+        }
+    }, [loading, error, data])
 
     const [priceChange, setPriceChange] = useState(0)
     useEffect(() => {

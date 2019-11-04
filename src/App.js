@@ -9,7 +9,12 @@ import MarketSummary from './components/MarketSummary';
 import Chart from './components/Chart';
 import OrderBook from './components/OrderBook';
 import MarketHistory from './components/MarketHistory';
+import { ApolloProvider } from '@apollo/react-hooks';
+import ApolloClient from 'apollo-boost';
 
+const client = new ApolloClient({
+  uri: 'https://demo.astrograph.io/graphql',
+});
 
 const App = () => {
 
@@ -23,7 +28,7 @@ const App = () => {
   `
 
   const Right = styled.div`
-      width: 325px;
+      width: auto;
   `
 
   const Middle = styled.div`
@@ -32,22 +37,24 @@ const App = () => {
 
   return (
     <div className="App">
-      <Header />
-      <CurrencyBar />
-      <Main>
-        <Left>
-          <Trade />
-          <TryStellar />
-        </Left>
-        <Middle>
-          <MarketSummary />
-          <Chart />
-        </Middle>
-        <Right>
-          <OrderBook />
-          <MarketHistory />
-        </Right>
-      </Main>
+      <ApolloProvider client={client}>
+        <Header />
+        <CurrencyBar />
+        <Main>
+          <Left>
+            <Trade />
+            <TryStellar />
+          </Left>
+          <Middle>
+            <MarketSummary />
+            <Chart />
+          </Middle>
+          <Right>
+            <OrderBook />
+            <MarketHistory />
+          </Right>
+        </Main>
+      </ApolloProvider>
     </div>
   )
 }

@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components'
 import MarketHeader from '../MarketHeader'
+import { gql } from "apollo-boost"
+import { useQuery } from "@apollo/react-hooks"
 
 const OrderBook = () => {
+    const dataMockup = {
+        price: 0,
+        amount: 0
+    }
+
+    const thousandSeparator = /\B(?=(\d{3})+(?!\d))/g
+
+    const ORDER_BOOK = gql`
+        {
+            orderBook(
+                limit: 20,
+                selling: "native",
+                buying: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
+            ){
+                bids {
+                    price
+                    amount
+                }
+                asks {
+                    price
+                    amount
+                }
+            }
+        }
+    `
+
+
+    const { loading, error, data } = useQuery(ORDER_BOOK)
+    const [bids, setBids] = useState([dataMockup])
+    const [asks, setAsks] = useState([dataMockup])
+
+    useEffect(() => {
+        if (!loading && !error) {
+            const { orderBook: { asks, bids } } = data
+            setBids(bids)
+            setAsks(asks)
+        }
+    }, [loading, error, data])
+
     const Container = styled.div`
         display: flex;
         flex-direction: column;
@@ -54,6 +95,37 @@ const OrderBook = () => {
         }
     `
 
+    const HeadRow = styled.div`
+        display: flex;
+
+        div {
+            width: 33%;
+            margin: 0 10px 8px 0;
+            border-bottom: 1px solid rgb(49, 49, 71);
+        }
+
+        div>span {
+            padding: 16px 0 8px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: right;
+            color: #fff;
+            display: block;
+        }
+    `
+
+    const Bid = styled.div`
+        max-height: 300px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        
+        ::-webkit-scrollbar {
+            width: 5px;
+            background: #313147;
+        }
+    `
+
     return (
         <Container>
             <MarketHeader>
@@ -63,6 +135,50 @@ const OrderBook = () => {
                     <button>+</button>
                 </HeadRight>
             </MarketHeader>
+
+            <HeadRow>
+                <div><span>Size (XLM)</span></div>
+                <div><span>Sum</span></div>
+                <div><span>Price (ETH)</span></div>
+            </HeadRow>
+            {
+                data &&
+                <Bid>
+                    {
+                        asks.map((ask, i) => {
+                            const previousAmount = i < 1 ? 0 : asks[i - 1].amount
+                            const sumTotal = +ask.amount + +previousAmount
+                            const sumValue = sumTotal.toString().replace(thousandSeparator, ".")
+                            const price = (+ask.price).toFixed(7)
+                            return (
+                                <HeadRow key={`ask-${i}`}>
+                                    <div><span>{ask.amount.toString().replace(thousandSeparator, ".")}</span></div>
+                                    <div><span>{sumValue}</span></div>
+                                    <div><span>{price}</span></div>
+                                </HeadRow>
+                            )
+                        })
+                    }
+
+                    {
+                        bids.map((bid, i, arr) => {
+                            const previousAmount = i < 1 ? 0 : bids[i - 1].amount
+                            const sumTotal = +bid.amount + +previousAmount
+                            const sumValue = sumTotal.toString().replace(thousandSeparator, ".")
+                            const price = (+bid.price).toFixed(7)
+                            return (
+                                <HeadRow key={`bid-${i}`}>
+                                    <div><span>{bid.amount}</span></div>
+                                    <div><span>{sumValue}</span></div>
+                                    <div><span>{price}</span></div>
+                                </HeadRow>
+                            )
+                        })
+                    }
+                </Bid>
+            }
+
+
         </Container>
     )
 }

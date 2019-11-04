@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-
-
-const client = new ApolloClient({
-    uri: 'https://demo.astrograph.io/graphql',
-});
+import { useQuery } from '@apollo/react-hooks';
 
 const Trade = () => {
+    const BESTBUY_BESTSELL = gql`
+        {
+            tick(
+                selling: "native"
+                buying: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
+            ) {
+            bestBuy: bestAsk
+            bestSell: bestBid
+            }
+        }
+    `
+    const { loading, error, data } = useQuery(BESTBUY_BESTSELL);
 
     // Active State
     const BUY = "BUY"
@@ -25,26 +32,12 @@ const Trade = () => {
     const [total, setTotal] = useState(0)
 
     useEffect(() => {
-        client
-            .query({
-                query: gql`
-                {
-                    tick(
-                        selling: "native"
-                        buying: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
-                    ) {
-                    bestBuy: bestAsk
-                    bestSell: bestBid
-                    }
-                }
-                `
-            })
-            .then(res => {
-                const data = res.data.tick
-                setBestSell(data.bestSell.toFixed(7))
-                setBestBuy(data.bestBuy.toFixed(7))
-            });
-    }, [])
+        if (!loading && !error) {
+            const { tick: { bestSell, bestBuy } } = data
+            setBestSell(bestSell.toFixed(7))
+            setBestBuy(bestBuy.toFixed(7))
+        }
+    }, [data, loading, error])
 
     // Styling
     const Container = styled.div`
