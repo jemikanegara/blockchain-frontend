@@ -196,7 +196,7 @@ const OrderBook = () => {
                             const sumValue = thousandSeparator(sumTotal)
                             const price = (+ask.price).toFixed(7)
                             return (
-                                <BodyRow key={ask.id}>
+                                <BodyRow key={`ask-${i}`}>
                                     <div><span>{thousandSeparator(ask.amount)}</span></div>
                                     <div><span>{sumValue}</span></div>
                                     <div><span>{price}</span></div>
@@ -215,7 +215,7 @@ const OrderBook = () => {
                             const sumValue = thousandSeparator(sumTotal)
                             const price = (+bid.price).toFixed(7)
                             return (
-                                <BodyRow key={bid.id}>
+                                <BodyRow key={`bid-${i}`}>
                                     <div><span>{thousandSeparator(bid.amount)}</span></div>
                                     <div><span>{sumValue}</span></div>
                                     <div><span>{price}</span></div>
