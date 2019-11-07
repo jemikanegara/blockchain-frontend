@@ -133,7 +133,7 @@ const MarketSummary = () => {
             <div>
                 <span className="title">24h Change</span>
                 <div style={{ color: `${priceChange < 0 ? `rgb(255, 139, 97)` : `rgb(63, 203, 224)`}` }}>
-                    {priceChange < 0 ? `-${priceChange.toFixed(2)}%` : `+${priceChange.toFixed(2)}%`}
+                    {priceChange < 0 ? `${priceChange.toFixed(2)}%` : `+${priceChange.toFixed(2)}%`}
                 </div>
             </div>
         </Container>

@@ -28,7 +28,7 @@ const App = () => {
   `
 
   const Right = styled.div`
-      width: auto;
+      width: 325px;
   `
 
   const Middle = styled.div`

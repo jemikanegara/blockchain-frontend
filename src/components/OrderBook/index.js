@@ -3,14 +3,13 @@ import styled from 'styled-components'
 import MarketHeader from '../MarketHeader'
 import { gql } from "apollo-boost"
 import { useQuery } from "@apollo/react-hooks"
+import thousandSeparator from "../../thousandSeparator"
 
 const OrderBook = () => {
     const dataMockup = {
         price: 0,
         amount: 0
     }
-
-    const thousandSeparator = /\B(?=(\d{3})+(?!\d))/g
 
     const ORDER_BOOK = gql`
         {
@@ -35,14 +34,25 @@ const OrderBook = () => {
     const { loading, error, data } = useQuery(ORDER_BOOK)
     const [bids, setBids] = useState([dataMockup])
     const [asks, setAsks] = useState([dataMockup])
+    const [spread, setSpread] = useState(0)
 
     useEffect(() => {
         if (!loading && !error) {
             const { orderBook: { asks, bids } } = data
+            asks.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+            bids.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
             setBids(bids)
             setAsks(asks)
         }
     }, [loading, error, data])
+
+    useEffect(() => {
+        if (!loading && !error) {
+            let newSpread = asks[asks.length - 1].price - bids[bids.length - 1].price
+            setSpread(newSpread)
+        }
+    }, [asks, bids, loading, error])
+
 
     const Container = styled.div`
         display: flex;
@@ -115,14 +125,49 @@ const OrderBook = () => {
         }
     `
 
-    const Bid = styled.div`
-        max-height: 300px;
+    const DataWrap = styled.div`
+        max-height: 200px;
         overflow-y: scroll;
         overflow-x: hidden;
         
         ::-webkit-scrollbar {
             width: 5px;
             background: #313147;
+        }
+    `
+
+    const BodyRow = styled(HeadRow)`
+        div {
+            border: none;
+        }
+
+        div>span {
+            font-size: 0.5625rem;
+            line-height: 1.25rem;
+            padding: 0;
+        }
+    `
+
+    const SpreadRow = styled.div`
+        margin: 8px 8px 16px 0;
+        font-size: 0.5625rem;
+        line-height: 1.25rem;
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+
+        div:first-child {
+            color: rgb(131, 132, 143);
+            text-align: left;
+        }
+
+        div:last-child {
+            color: #fff;
+            text-align: right;
+        }
+
+        div:last-child>span:not(:first-child) {
+            margin-left: 8px;
         }
     `
 
@@ -143,39 +188,42 @@ const OrderBook = () => {
             </HeadRow>
             {
                 data &&
-                <Bid>
+                <DataWrap>
                     {
                         asks.map((ask, i) => {
                             const previousAmount = i < 1 ? 0 : asks[i - 1].amount
                             const sumTotal = +ask.amount + +previousAmount
-                            const sumValue = sumTotal.toString().replace(thousandSeparator, ".")
+                            const sumValue = thousandSeparator(sumTotal)
                             const price = (+ask.price).toFixed(7)
                             return (
-                                <HeadRow key={`ask-${i}`}>
-                                    <div><span>{ask.amount.toString().replace(thousandSeparator, ".")}</span></div>
+                                <BodyRow key={ask.id}>
+                                    <div><span>{thousandSeparator(ask.amount)}</span></div>
                                     <div><span>{sumValue}</span></div>
                                     <div><span>{price}</span></div>
-                                </HeadRow>
+                                </BodyRow>
                             )
                         })
                     }
-
+                    <SpreadRow>
+                        <div>Spread (XLM)</div>
+                        <div><span>{spread.toFixed(3)}</span> <span>{(spread * 100).toFixed(3)}{`%`}</span></div>
+                    </SpreadRow>
                     {
                         bids.map((bid, i, arr) => {
                             const previousAmount = i < 1 ? 0 : bids[i - 1].amount
                             const sumTotal = +bid.amount + +previousAmount
-                            const sumValue = sumTotal.toString().replace(thousandSeparator, ".")
+                            const sumValue = thousandSeparator(sumTotal)
                             const price = (+bid.price).toFixed(7)
                             return (
-                                <HeadRow key={`bid-${i}`}>
-                                    <div><span>{bid.amount}</span></div>
+                                <BodyRow key={bid.id}>
+                                    <div><span>{thousandSeparator(bid.amount)}</span></div>
                                     <div><span>{sumValue}</span></div>
                                     <div><span>{price}</span></div>
-                                </HeadRow>
+                                </BodyRow>
                             )
                         })
                     }
-                </Bid>
+                </DataWrap>
             }
 
 
