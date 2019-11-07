@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components'
 import MarketHeader from '../MarketHeader'
+import CandleStick from './CandleStick'
+import LineChart from './LineChart'
+import MarketDepth from './MarketDepth'
+
+const CANDLE_STICK = "CANDLE_STICK"
+const LINE_CHART = "LINE_CHART"
+const MARKET_DEPTH = "MARKET_DEPTH"
 
 const Chart = () => {
+    const [showing, setShowing] = useState(CANDLE_STICK)
     const Container = styled.div`
         background: rgb(24, 24, 33);
         border-color: rgb(49, 49, 71);
@@ -74,11 +82,18 @@ const Chart = () => {
             margin-top: -4px;
         }
     `
+
+    const MarketChart = styled.div`
+        color: #fff;
+        margin-top: 10px;
+    `
+
     return (<Container>
         <MarketHeader>
-            <nav><button>Candlestick</button>
-                <button>Line Chart</button>
-                <button>Market Depth</button>
+            <nav>
+                <button onClick={() => { setShowing(CANDLE_STICK) }}>Candlestick</button>
+                <button onClick={() => { setShowing(LINE_CHART) }}>Line Chart</button>
+                <button onClick={() => { setShowing(MARKET_DEPTH) }}>Market Depth</button>
             </nav>
             <RightHead>
                 <select>
@@ -94,6 +109,18 @@ const Chart = () => {
                 <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#fff" fillRule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg></span>
             </RightHead>
         </MarketHeader>
+
+        <MarketChart>
+            {
+                showing === CANDLE_STICK && <CandleStick />
+            }
+            {
+                showing === LINE_CHART && <LineChart />
+            }
+            {
+                showing === MARKET_DEPTH && <MarketDepth />
+            }
+        </MarketChart>
     </Container>)
 }
 
