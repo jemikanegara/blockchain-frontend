@@ -1,16 +1,229 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import MarketHeader from '../MarketHeader'
 import CandleStick from './CandleStick'
 import LineChart from './LineChart'
 import MarketDepth from './MarketDepth'
+import ReactEcharts from 'echarts-for-react';
+import { useQuery } from '@apollo/react-hooks';
+import { gql } from "apollo-boost"
+import { renderItem } from './chartHelper'
 
 const CANDLE_STICK = "CANDLE_STICK"
 const LINE_CHART = "LINE_CHART"
 const MARKET_DEPTH = "MARKET_DEPTH"
 
 const Chart = () => {
+    const today = new Date()
+    const oneDay = 1000 * 60 * 60 * 24
+
+    const generateDates = (durationInDays) => {
+        let result = []
+        for (let i = durationInDays - 1; i >= 0; i--) {
+            const newDate = new Date(today - (oneDay * i))
+            const dateInString = `${newDate.getMonth()} ${newDate.getDate()}`
+            result.push(dateInString)
+        }
+        return result
+    }
+
+
+    const GET_CHART_DATA = gql`
+    {
+        tradeAggregations(
+        last: 168 # 7 days
+        resolution: 3600000 # 1 hour
+        baseAsset: "native"
+        counterAsset: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
+        ) {
+            tradeCount
+            baseVolume
+            counterVolume
+            avg
+            high
+            low
+            open
+            close
+        }
+    }
+    `
     const [showing, setShowing] = useState(CANDLE_STICK)
+
+    const series = {
+        type: 'k',
+        // dimensions: [null, 'open', 'close', 'lowest', 'highest'],
+        // renderItem,
+        // encode: {
+        //     x: 0,
+        //     y: [1, 2, 3, 4],
+        //     tooltip: [1, 2, 3, 4]
+        // },
+        data: [
+            [20, 30, 10, 35],
+            [40, 35, 30, 55],
+            [33, 38, 33, 40],
+            [40, 40, 32, 42]
+        ],
+        itemStyle: {
+            color: "rgba(36, 177, 199, 0.7)",
+            borderColor: "rgb(36, 177, 199)",
+            color0: "rgba(255, 139, 97, 0.7)",
+            borderColor0: "rgb(255, 139, 97)"
+        }
+    }
+
+    const option = {
+        xAxis: {
+            data: generateDates(7)
+        },
+        yAxis: {
+        },
+        series: [{ ...series }],
+        // grid: [
+        //     {
+        //         left: '10%',
+        //         right: '8%',
+        //         bottom: 150
+        //     }
+        // ],
+        // toolbox: {
+        //     feature: {
+        //         dataZoom: {
+        //             yAxisIndex: false
+        //         },
+        //         brush: {
+        //             type: ['lineX', 'clear']
+        //         }
+        //     }
+        // },
+        // xAxis: [
+        //     {
+        //         type: 'category',
+        //         data: generateDates(7),
+        //         scale: true,
+        //         boundaryGap: false,
+        //         axisLine: { onZero: false },
+        //         splitLine: { show: false },
+        //         splitNumber: 20,
+        //         min: 'dataMin',
+        //         max: 'dataMax',
+        //         axisPointer: {
+        //             z: 100
+        //         }
+        //     }
+        // ],
+        // yAxis: [
+        //     {
+        //         scale: true,
+        //         splitArea: {
+        //             show: true
+        //         }
+        //     }
+        // ],
+        // tooltip: {
+        //     trigger: 'axis',
+        //     axisPointer: {
+        //         type: 'cross'
+        //     },
+        //     backgroundColor: 'rgba(245, 245, 245, 0.8)',
+        //     borderWidth: 1,
+        //     borderColor: '#ccc',
+        //     padding: 10,
+        //     textStyle: {
+        //         color: '#000'
+        //     },
+        //     position: function (pos, params, el, elRect, size) {
+        //         var obj = {top: 10};
+        //         obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+        //         return obj;
+        //     },
+        //     extraCssText: 'width: 170px'
+        // },
+        // axisPointer: {
+        //     link: {xAxisIndex: 'all'},
+        //     label: {
+        //         backgroundColor: '#777'
+        //     }
+        // }
+    }
+
+    const dataMockUp = {
+        open: 0,
+        close: 0,
+        high: 0,
+        low: 99999999
+    }
+
+    // Fetching Data
+    const { loading, error, data } = useQuery(GET_CHART_DATA)
+
+    // Chart Option
+    const [chartOption, setChartOption] = useState(option)
+
+    // Reduce To 7 Days @ 6 hours interval
+    const reduceData = (copyData) => {
+        // Get The 6 Oldest Data
+        const spliced = copyData.length >= 6 ? copyData.splice(-6, 6) : copyData.splice(0, copyData.length)
+
+        // Prepare Object for new data
+        let newData = {
+            ...dataMockUp
+        }
+        // Set Close Price (first array is the newest)
+        newData.close = spliced[0].close
+
+        // Set Open Price (last array is the oldest)
+        newData.open = spliced[spliced.length - 1].open
+
+        // Set Highest and Lowest Price
+        spliced.forEach((dataPerHour, i) => {
+            const next = i + 1 === spliced.length ? i : i + 1
+
+            if (dataPerHour.high >= spliced[next].high) {
+                if (dataPerHour.high > newData.high) {
+                    newData.high = dataPerHour.high
+                }
+            }
+
+            if (dataPerHour.low <= spliced[next].low) {
+                if (dataPerHour.low < newData.low) {
+                    newData.low = dataPerHour.low
+                }
+            }
+        })
+
+        // Open, Close, Low, High
+        let newChartData = []
+        newChartData.push(newData.open)
+        newChartData.push(newData.close)
+        newChartData.push(newData.low)
+        newChartData.push(newData.high)
+
+        return newChartData
+    }
+
+    useEffect(() => {
+        if (data) {
+            const { tradeAggregations } = data
+            const copyData = tradeAggregations.slice()
+
+            let newData = []
+            while (copyData.length > 0) {
+                newData.push(reduceData(copyData))
+            }
+
+            let newOption = { ...option }
+            newOption.series[0].data = newData
+            setChartOption(newOption)
+        }
+
+    }, [data])
+
+    useEffect(() => {
+        console.log(chartOption)
+    }, [chartOption])
+
+
     const Container = styled.div`
         background: rgb(24, 24, 33);
         border-color: rgb(49, 49, 71);
@@ -86,6 +299,7 @@ const Chart = () => {
     const MarketChart = styled.div`
         color: #fff;
         margin-top: 10px;
+        height: 500px;
     `
 
     return (<Container>
@@ -111,14 +325,22 @@ const Chart = () => {
         </MarketHeader>
 
         <MarketChart>
-            {
-                showing === CANDLE_STICK && <CandleStick />
+            {/* {
+                showing === CANDLE_STICK && option && <CandleStick />
             }
             {
                 showing === LINE_CHART && <LineChart />
             }
             {
                 showing === MARKET_DEPTH && <MarketDepth />
+            } */}
+
+            {
+                showing === CANDLE_STICK && chartOption && (
+                    <ReactEcharts
+                        option={chartOption}
+                    />
+                )
             }
         </MarketChart>
     </Container>)
