@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from "styled-components"
-import MarketHeader from '../MarketHeader'
+import { MarketHeader } from '../SharedStyling'
 import { gql } from "apollo-boost"
 import { useLazyQuery } from "@apollo/react-hooks"
 import thousandSeparator from "../../thousandSeparator"

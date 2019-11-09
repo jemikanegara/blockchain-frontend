@@ -1,13 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import MarketHeader from '../MarketHeader'
-import CandleStick from './CandleStick'
-import LineChart from './LineChart'
-import MarketDepth from './MarketDepth'
+import { MarketHeader } from '../SharedStyling'
 import ReactEcharts from 'echarts-for-react';
 import { useQuery } from '@apollo/react-hooks';
 import { gql } from "apollo-boost"
-import { renderItem } from './chartHelper'
+import { MonthList } from './chartHelper'
 
 const CANDLE_STICK = "CANDLE_STICK"
 const LINE_CHART = "LINE_CHART"
@@ -21,7 +18,7 @@ const Chart = () => {
         let result = []
         for (let i = durationInDays - 1; i >= 0; i--) {
             const newDate = new Date(today - (oneDay * i))
-            const dateInString = `${newDate.getMonth()} ${newDate.getDate()}`
+            const dateInString = `${MonthList[newDate.getMonth()]} ${newDate.getDate()}`
 
             for (let i = 0; i < 4; i++) {
                 if (i === 2) {

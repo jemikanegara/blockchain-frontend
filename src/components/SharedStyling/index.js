@@ -1,8 +1,6 @@
-import React from 'react'
 import styled from 'styled-components'
 
-const MarketHeader = (props) => {
-    const Container = styled.div`
+export const MarketHeader = styled.div`
         background: rgb(49, 49, 71);
         padding: 0px 16px;
         flex-grow: 0;
@@ -14,11 +12,3 @@ const MarketHeader = (props) => {
             color: rgb(255, 255, 255);
         }
     `
-    return (
-        <Container>
-            {props.children}
-        </Container>
-    )
-}
-
-export default MarketHeader
