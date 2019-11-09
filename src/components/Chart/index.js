@@ -22,7 +22,14 @@ const Chart = () => {
         for (let i = durationInDays - 1; i >= 0; i--) {
             const newDate = new Date(today - (oneDay * i))
             const dateInString = `${newDate.getMonth()} ${newDate.getDate()}`
-            result.push(dateInString)
+
+            for (let i = 0; i < 4; i++) {
+                if (i === 2) {
+                    result.push(dateInString)
+                } else {
+                    result.push("")
+                }
+            }
         }
         return result
     }
@@ -51,13 +58,6 @@ const Chart = () => {
 
     const series = {
         type: 'k',
-        // dimensions: [null, 'open', 'close', 'lowest', 'highest'],
-        // renderItem,
-        // encode: {
-        //     x: 0,
-        //     y: [1, 2, 3, 4],
-        //     tooltip: [1, 2, 3, 4]
-        // },
         data: [
             [20, 30, 10, 35],
             [40, 35, 30, 55],
@@ -77,74 +77,9 @@ const Chart = () => {
             data: generateDates(7)
         },
         yAxis: {
+            min: 0.0003
         },
         series: [{ ...series }],
-        // grid: [
-        //     {
-        //         left: '10%',
-        //         right: '8%',
-        //         bottom: 150
-        //     }
-        // ],
-        // toolbox: {
-        //     feature: {
-        //         dataZoom: {
-        //             yAxisIndex: false
-        //         },
-        //         brush: {
-        //             type: ['lineX', 'clear']
-        //         }
-        //     }
-        // },
-        // xAxis: [
-        //     {
-        //         type: 'category',
-        //         data: generateDates(7),
-        //         scale: true,
-        //         boundaryGap: false,
-        //         axisLine: { onZero: false },
-        //         splitLine: { show: false },
-        //         splitNumber: 20,
-        //         min: 'dataMin',
-        //         max: 'dataMax',
-        //         axisPointer: {
-        //             z: 100
-        //         }
-        //     }
-        // ],
-        // yAxis: [
-        //     {
-        //         scale: true,
-        //         splitArea: {
-        //             show: true
-        //         }
-        //     }
-        // ],
-        // tooltip: {
-        //     trigger: 'axis',
-        //     axisPointer: {
-        //         type: 'cross'
-        //     },
-        //     backgroundColor: 'rgba(245, 245, 245, 0.8)',
-        //     borderWidth: 1,
-        //     borderColor: '#ccc',
-        //     padding: 10,
-        //     textStyle: {
-        //         color: '#000'
-        //     },
-        //     position: function (pos, params, el, elRect, size) {
-        //         var obj = {top: 10};
-        //         obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
-        //         return obj;
-        //     },
-        //     extraCssText: 'width: 170px'
-        // },
-        // axisPointer: {
-        //     link: {xAxisIndex: 'all'},
-        //     label: {
-        //         backgroundColor: '#777'
-        //     }
-        // }
     }
 
     const dataMockUp = {
@@ -311,32 +246,24 @@ const Chart = () => {
             </nav>
             <RightHead>
                 <select>
-                    <option value="0">1H @ 1M intervals</option>
+                    {/* <option value="0">1H @ 1M intervals</option>
                     <option value="1">6H @ 5M intervals</option>
                     <option value="2">1D @ 30M intervals</option>
                     <option value="3">7D @ 3H intervals</option>
                     <option value="4">14D @ 6H intervals</option>
                     <option value="5">30D @ 12H intervals</option>
                     <option value="6">90D @ 1D intervals</option>
-                    <option value="7">52W @ 1W intervals</option>
+                    <option value="7">52W @ 1W intervals</option> */}
+                    <option value="8">7D @ 3H intervals</option>
                 </select>
                 <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="#fff" fillRule="evenodd" d="M12 13.999L2 4v5.656l10 10 10-10V4z"></path></svg></span>
             </RightHead>
         </MarketHeader>
 
         <MarketChart>
-            {/* {
-                showing === CANDLE_STICK && option && <CandleStick />
-            }
+            {loading && <div>Loading ...</div>}
             {
-                showing === LINE_CHART && <LineChart />
-            }
-            {
-                showing === MARKET_DEPTH && <MarketDepth />
-            } */}
-
-            {
-                showing === CANDLE_STICK && chartOption && (
+                !loading && showing === CANDLE_STICK && chartOption && (
                     <ReactEcharts
                         option={chartOption}
                     />
