@@ -68,7 +68,7 @@ const MarketHistory = () => {
     useEffect(() => {
         setMarketHistory([])
         loadMarketHistory()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Set Market History
@@ -77,7 +77,7 @@ const MarketHistory = () => {
             const { trades: { nodes } } = data
             setMarketHistory([...marketHistory, ...nodes])
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
     // Scroll After Load
@@ -179,6 +179,18 @@ const MarketHistory = () => {
         div>span.down {
             color: rgb(255, 139, 97);
         }
+
+        svg {
+            margin-right: 8px;
+        }
+
+        div>span.up>svg {
+            transform: rotate(-45deg)
+        }
+
+        div>span.down>svg{
+            transform: rotate(45deg)
+        }
     `
 
     const LoadMoreButton = styled.button`
@@ -230,7 +242,15 @@ const MarketHistory = () => {
 
                     return (
                         <BodyRow key={history.id}>
-                            <div><span className={priceIsUp ? "up" : "down"}>{price}</span></div>
+                            <div>
+
+                                <span className={priceIsUp ? "up" : "down"}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24">
+                                        <path fill={priceIsUp ? "#3fcbe0" : "#ff8b61"} fill-rule="evenodd" d="M14 2l5 5h-5.656l-5-5H14zM8.344 22l8-8H0v-4h22l2 2-10 10H8.344z"></path>
+                                    </svg>
+                                    {price}
+                                </span>
+                            </div>
                             <div><span>{size}</span></div>
                             <div><span>{when}</span></div>
                         </BodyRow>
