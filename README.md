@@ -9,5 +9,6 @@
 - No Currency converter (I'm running out of time)
 - No Switch base currency with the counter currency (I'm running out of time)
 - No Interval Variation on the chart, I'm running out of time
+- No Login / Register Pop Up
 
 I'm sorry for the dirty code, I haven't write any react app with hooks before this. 
