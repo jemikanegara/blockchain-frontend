@@ -62,12 +62,13 @@ const MarketHistory = () => {
     const [marketHistory, setMarketHistory] = useState([history])
 
     // Lazy Query History Fetching (will automatically run when variable change)
-    const [loadMarketHistory, { called, loading, error, data }] = useLazyQuery(MARKET_HISTORY, { variables: { before } })
+    const [loadMarketHistory, { loading, data }] = useLazyQuery(MARKET_HISTORY, { variables: { before } })
 
     // Initialize
     useEffect(() => {
         setMarketHistory([])
         loadMarketHistory()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Set Market History
@@ -76,6 +77,7 @@ const MarketHistory = () => {
             const { trades: { nodes } } = data
             setMarketHistory([...marketHistory, ...nodes])
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
     // Scroll After Load

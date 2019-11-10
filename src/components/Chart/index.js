@@ -8,7 +8,7 @@ import { Container, MarketChart, RightHead } from './chartStyling'
 import ReactEcharts from 'echarts-for-react';
 import { useQuery } from '@apollo/react-hooks';
 import { gql } from "apollo-boost"
-import { option, dataMockUp } from './chartDataMockUp'
+import { option, dataMockUp, lineChartSeries, candleStickSeries } from './chartDataMockUp'
 
 // What to show
 const CANDLE_STICK = "CANDLE_STICK"
@@ -88,52 +88,88 @@ const Chart = () => {
                 {
                     counterVolume: sum.counterVolume + counterVolume,
                     baseVolume: sum.baseVolume + baseVolume,
-                    price: sum.price + price
                 }
             ),
-            { counterVolume: 0, baseVolume: 0, price: 0 }
+            { counterVolume: 0, baseVolume: 0 }
         )
 
         // Open, Close, Low, High
-        let newCandleStickData = []
-        newCandleStickData.push(newData.open)
-        newCandleStickData.push(newData.close)
-        newCandleStickData.push(newData.low)
-        newCandleStickData.push(newData.high)
-
-        let newBarData = []
-        newBarData.push(volume.counterVolume)
-
+        let OHLC = [newData.open, newData.close, newData.low, newData.high]
         return {
-            candlestick: newCandleStickData,
-            bar: (volume.baseVolume / 1000),
-            price: volume.price
+            OHLC,
+            bar: (volume.baseVolume / 1000)
         }
+    }
+
+    const setToCandleStick = () => {
+        const { tradeAggregations } = data
+        const copyData = tradeAggregations.slice()
+
+        let candleStickData = []
+
+        while (copyData.length > 0) {
+            const newData = reduceData(copyData)
+            candleStickData.push(newData.OHLC)
+        }
+
+        let newOption = { ...option }
+        newOption.xAxis.boundaryGap = true
+        newOption.series[0] = { ...candleStickSeries }
+        newOption.series[0].data = candleStickData
+
+        setChartOption(newOption)
+    }
+
+    const setToLineChart = () => {
+        const { tradeAggregations } = data
+        const copyData = tradeAggregations.slice()
+
+        let lineChartData = []
+
+        while (copyData.length > 0) {
+            const newData = reduceData(copyData)
+            lineChartData.push(newData.OHLC[1])
+        }
+
+        let newOption = { ...option }
+        newOption.xAxis.boundaryGap = false
+        newOption.series[0] = { ...lineChartSeries }
+        newOption.series[0].data = lineChartData
+
+        console.log(newOption)
+
+        setChartOption(newOption)
+    }
+
+    const setToMarketDepth = () => {
+        return null
     }
 
     // Set Chart Option 
     useEffect(() => {
         if (data) {
-            const { tradeAggregations } = data
-            const copyData = tradeAggregations.slice()
-
-            let candleStickData = []
-            let barData = []
-
-            while (copyData.length > 0) {
-                const newData = reduceData(copyData)
-                candleStickData.push(newData.candlestick)
-                barData.push(newData.bar)
-            }
-
-            let newOption = { ...option }
-            newOption.series[0].data = candleStickData
-
-            if (!showing) setShowing(CANDLE_STICK)
-            setChartOption(newOption)
+            setToCandleStick(data)
         }
     }, [data])
 
+    // If Showing Changed
+    useEffect(() => {
+        if (data) {
+            switch (showing) {
+                case LINE_CHART:
+                    setToLineChart(data)
+                    break;
+                case MARKET_DEPTH:
+                    setToMarketDepth(data)
+                    break;
+                default:
+                    setToCandleStick(data)
+            }
+        }
+
+    }, [showing])
+
+    // If Chart Option Changed
     useEffect(() => {
         if (chartEl.current) {
             const chartInstance = chartEl.current.getEchartsInstance()
@@ -144,9 +180,23 @@ const Chart = () => {
     return (<Container>
         <MarketHeader>
             <nav>
-                <button onClick={() => { setShowing(CANDLE_STICK) }}>Candlestick</button>
-                <button onClick={() => { setShowing(LINE_CHART) }}>Line Chart</button>
-                <button onClick={() => { setShowing(MARKET_DEPTH) }}>Market Depth</button>
+
+                <button
+                    className={showing === CANDLE_STICK ? "active" : ""}
+                    onClick={() => { setShowing(CANDLE_STICK) }}>
+                    Candlestick
+                </button>
+
+                <button
+                    className={showing === LINE_CHART ? "active" : ""}
+                    onClick={() => { setShowing(LINE_CHART) }}>
+                    Line Chart
+                </button>
+
+                <button className={showing === MARKET_DEPTH ? "active" : ""} onClick={() => { setShowing(MARKET_DEPTH) }}>
+                    Market Depth
+                </button>
+
             </nav>
             <RightHead>
                 <select>

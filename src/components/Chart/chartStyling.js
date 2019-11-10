@@ -23,7 +23,7 @@ export const Container = styled.div`
                 white-space: nowrap;
                 position: relative;
                 height: 2.5rem;
-                color: rgb(255, 255, 255);
+                color: #d0cfcc;
                 padding: 0px 12px;
                 margin: 0px;
                 display: flex;
@@ -31,7 +31,25 @@ export const Container = styled.div`
                 text-decoration: none;         
                 background: none;
                 border: none;
-                cursor: pointer;       
+                cursor: pointer; 
+                outline: none;      
+            }
+
+            button:hover,
+            button.active {
+                color: #fff;
+            }
+
+            button.active::before{
+                content: "";
+                width: 6px;
+                height: 6px;
+                position: absolute;
+                left: 0px;
+                top: 50%;
+                margin-top: -3px;
+                background: rgb(255, 255, 255);
+                border-radius: 50%;
             }
         }
     `
