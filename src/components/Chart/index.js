@@ -1,37 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import React, { useState, useEffect, useRef } from 'react'
+
+// Styling Import
 import { MarketHeader } from '../SharedStyling'
+import { Container, MarketChart, RightHead } from './chartStyling'
+
+// Chart Tooling Import
 import ReactEcharts from 'echarts-for-react';
 import { useQuery } from '@apollo/react-hooks';
 import { gql } from "apollo-boost"
-import { MonthList } from './chartHelper'
+import { option, dataMockUp } from './chartDataMockUp'
 
+// What to show
 const CANDLE_STICK = "CANDLE_STICK"
 const LINE_CHART = "LINE_CHART"
 const MARKET_DEPTH = "MARKET_DEPTH"
 
+// Component
 const Chart = () => {
-    const today = new Date()
-    const oneDay = 1000 * 60 * 60 * 24
 
-    const generateDates = (durationInDays) => {
-        let result = []
-        for (let i = durationInDays - 1; i >= 0; i--) {
-            const newDate = new Date(today - (oneDay * i))
-            const dateInString = `${MonthList[newDate.getMonth()]} ${newDate.getDate()}`
+    // Set Showing State
+    const [showing, setShowing] = useState(CANDLE_STICK)
 
-            for (let i = 0; i < 4; i++) {
-                if (i === 2) {
-                    result.push(dateInString)
-                } else {
-                    result.push("")
-                }
-            }
-        }
-        return result
-    }
-
-
+    // Set GQL Query
     const GET_CHART_DATA = gql`
     {
         tradeAggregations(
@@ -51,46 +41,15 @@ const Chart = () => {
         }
     }
     `
-    const [showing, setShowing] = useState(CANDLE_STICK)
-
-    const series = {
-        type: 'k',
-        data: [
-            [20, 30, 10, 35],
-            [40, 35, 30, 55],
-            [33, 38, 33, 40],
-            [40, 40, 32, 42]
-        ],
-        itemStyle: {
-            color: "rgba(36, 177, 199, 0.7)",
-            borderColor: "rgb(36, 177, 199)",
-            color0: "rgba(255, 139, 97, 0.7)",
-            borderColor0: "rgb(255, 139, 97)"
-        }
-    }
-
-    const option = {
-        xAxis: {
-            data: generateDates(7)
-        },
-        yAxis: {
-            min: 0.0003
-        },
-        series: [{ ...series }],
-    }
-
-    const dataMockUp = {
-        open: 0,
-        close: 0,
-        high: 0,
-        low: 99999999
-    }
 
     // Fetching Data
-    const { loading, error, data } = useQuery(GET_CHART_DATA)
+    const { loading, data } = useQuery(GET_CHART_DATA)
 
     // Chart Option
-    const [chartOption, setChartOption] = useState(option)
+    const [chartOption, setChartOption] = useState({ ...option })
+
+    // Chart Ref
+    const chartEl = useRef(null)
 
     // Reduce To 7 Days @ 6 hours interval
     const reduceData = (copyData) => {
@@ -124,115 +83,63 @@ const Chart = () => {
             }
         })
 
-        // Open, Close, Low, High
-        let newChartData = []
-        newChartData.push(newData.open)
-        newChartData.push(newData.close)
-        newChartData.push(newData.low)
-        newChartData.push(newData.high)
+        const volume = spliced.reduce((sum, { counterVolume, baseVolume, price }) =>
+            (
+                {
+                    counterVolume: sum.counterVolume + counterVolume,
+                    baseVolume: sum.baseVolume + baseVolume,
+                    price: sum.price + price
+                }
+            ),
+            { counterVolume: 0, baseVolume: 0, price: 0 }
+        )
 
-        return newChartData
+        // Open, Close, Low, High
+        let newCandleStickData = []
+        newCandleStickData.push(newData.open)
+        newCandleStickData.push(newData.close)
+        newCandleStickData.push(newData.low)
+        newCandleStickData.push(newData.high)
+
+        let newBarData = []
+        newBarData.push(volume.counterVolume)
+
+        return {
+            candlestick: newCandleStickData,
+            bar: (volume.baseVolume / 1000),
+            price: volume.price
+        }
     }
 
+    // Set Chart Option 
     useEffect(() => {
         if (data) {
             const { tradeAggregations } = data
             const copyData = tradeAggregations.slice()
 
-            let newData = []
+            let candleStickData = []
+            let barData = []
+
             while (copyData.length > 0) {
-                newData.push(reduceData(copyData))
+                const newData = reduceData(copyData)
+                candleStickData.push(newData.candlestick)
+                barData.push(newData.bar)
             }
 
             let newOption = { ...option }
-            newOption.series[0].data = newData
+            newOption.series[0].data = candleStickData
+
+            if (!showing) setShowing(CANDLE_STICK)
             setChartOption(newOption)
         }
-
     }, [data])
 
     useEffect(() => {
-        console.log(chartOption)
+        if (chartEl.current) {
+            const chartInstance = chartEl.current.getEchartsInstance()
+            chartInstance.setOption(chartOption)
+        }
     }, [chartOption])
-
-
-    const Container = styled.div`
-        background: rgb(24, 24, 33);
-        border-color: rgb(49, 49, 71);
-        border-style: solid;
-        border-width: 0px 1px 1px 0px;
-        padding: 24px 16px 16px;
-        flex: 1 1 0%;
-        overflow: hidden;
-
-        nav {
-            display: flex;
-            justify-content: flex-start;
-
-            button {
-                padding: 12px;
-                font-weight: 500;
-                font-size: 0.8125rem;
-                font-family: GraphikCondensed, -apple-system, BlinkMacSystemFont, sans-serif;
-                letter-spacing: 1.5px;
-                text-transform: uppercase;
-                white-space: nowrap;
-                position: relative;
-                height: 2.5rem;
-                color: rgb(255, 255, 255);
-                padding: 0px 12px;
-                margin: 0px;
-                display: flex;
-                align-items: center;
-                text-decoration: none;         
-                background: none;
-                border: none;
-                cursor: pointer;       
-            }
-        }
-    `
-
-    const RightHead = styled.div`
-        position: relative;
-
-        select {
-            height: 24px;
-            padding-right: 14px;
-            -webkit-appearance: none;
-            color: rgb(255, 255, 255);
-            letter-spacing: 0.0937rem;
-            width: 100%;
-            background: none;
-            border: none;
-            outline: none;
-            padding: 0px;
-            display: inline-block;
-            position: relative;
-            min-width: 102px;
-            font-size: 0.75rem;
-            box-shadow: rgb(49, 49, 71) 0px 0px 0px 1px inset;
-            background: rgb(24, 24, 33);
-            border-radius: 2px;
-            padding: 0px 18px 0 12px;
-            width: auto;
-            margin: 5px 0;
-            height: 30px;
-        }
-        
-        span {
-            display: block;
-            position: absolute;
-            top: 30%;
-            right: 9px;
-            margin-top: -4px;
-        }
-    `
-
-    const MarketChart = styled.div`
-        color: #fff;
-        margin-top: 10px;
-        height: 500px;
-    `
 
     return (<Container>
         <MarketHeader>
@@ -260,9 +167,12 @@ const Chart = () => {
         <MarketChart>
             {loading && <div>Loading ...</div>}
             {
-                !loading && showing === CANDLE_STICK && chartOption && (
+                !loading && chartOption && (
                     <ReactEcharts
                         option={chartOption}
+                        notMerge={true}
+                        opts={{ renderer: 'svg' }}
+                        ref={chartEl}
                     />
                 )
             }

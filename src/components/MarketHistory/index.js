@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from "styled-components"
 import { MarketHeader } from '../SharedStyling'
 import { gql } from "apollo-boost"
@@ -26,7 +26,7 @@ const MarketHistory = () => {
         query ($before: String) {
             trades(
                 before: $before,
-                last: 20, 
+                last: 6, 
                 baseAsset: "native", 
                 counterAsset: "ETH-GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5"
             )   {
@@ -51,6 +51,10 @@ const MarketHistory = () => {
             }
         }
     `
+
+    // Data Wrap Reference
+    const dataWrapEl = useRef(null)
+
     // Pagination
     const [before, setBefore] = useState("")
 
@@ -60,17 +64,26 @@ const MarketHistory = () => {
     // Lazy Query History Fetching (will automatically run when variable change)
     const [loadMarketHistory, { called, loading, error, data }] = useLazyQuery(MARKET_HISTORY, { variables: { before } })
 
+    // Initialize
     useEffect(() => {
         setMarketHistory([])
         loadMarketHistory()
     }, [])
 
+    // Set Market History
     useEffect(() => {
         if (data) {
             const { trades: { nodes } } = data
             setMarketHistory([...marketHistory, ...nodes])
         }
     }, [data])
+
+    // Scroll After Load
+    useEffect(() => {
+        if (marketHistory && dataWrapEl.current) {
+            dataWrapEl.current.scrollTop = dataWrapEl.current.scrollHeight
+        }
+    }, [marketHistory, before])
 
     const loadMoreMarket = () => {
         const { trades: { pageInfo: { endCursor } } } = data
@@ -148,13 +161,21 @@ const MarketHistory = () => {
         }
 
         div>span {
-            font-size: 0.5625rem;
+            font-size: 11px;
             line-height: 1.25rem;
             padding: 0;
         }
 
         div>span:last-child {
             text-transform: lowercase;
+        }
+
+        div>span.up {
+            color: rgb(63, 203, 224);
+        }
+
+        div>span.down {
+            color: rgb(255, 139, 97);
         }
     `
 
@@ -184,11 +205,14 @@ const MarketHistory = () => {
             <div><span>Size</span></div>
             <div><span>When</span></div>
         </HeadRow>
-        <DataWrap>
+        <DataWrap ref={dataWrapEl} id="abc">
             {
-                data && marketHistory.map(history => {
+                data && marketHistory.map((history, i) => {
+                    const isLastIndex = i === marketHistory.length - 1
+                    if (isLastIndex) return null
 
                     // Price
+                    const priceIsUp = history.price >= marketHistory[i + 1].price
                     const priceCalculation = history.price.toFixed(7)
                     const price = thousandSeparator(priceCalculation)
                     // Size
@@ -204,26 +228,26 @@ const MarketHistory = () => {
 
                     return (
                         <BodyRow key={history.id}>
-                            <div><span>{price}</span></div>
+                            <div><span className={priceIsUp ? "up" : "down"}>{price}</span></div>
                             <div><span>{size}</span></div>
                             <div><span>{when}</span></div>
                         </BodyRow>
                     )
                 })
             }
+
+            {
+                !loading && (
+                    <LoadMoreButton onClick={loadMoreMarket}>Load More</LoadMoreButton>
+                )
+            }
+
+            {
+                loading && (
+                    <LoadingMessage>Loading ...</LoadingMessage>
+                )
+            }
         </DataWrap>
-
-        {
-            loading && (
-                <LoadingMessage>Loading ...</LoadingMessage>
-            )
-        }
-
-        {
-            !loading && (
-                <LoadMoreButton onClick={loadMoreMarket}>Load More</LoadMoreButton>
-            )
-        }
     </Container>)
 }
 
